@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import ssl
+
 try:
     import cPickle as pickle
     from urllib2 import urlopen
@@ -74,11 +75,6 @@ def loadFileLists():
 
 
 def loadFeatures(files):
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-
-
     data = np.ndarray((len(files), IMG_SIZE * IMG_SIZE * 3))
     for n, f in enumerate(files):
         logging.debug('loading file #%d' % n)
@@ -101,10 +97,13 @@ def loadFeatures(files):
 
 
 def loadFeaturesURL(urls):
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
     data = np.ndarray((len(urls), IMG_SIZE * IMG_SIZE * 3))
     for n, url in enumerate(urls):
         logging.debug('loading file #%d' % n)
-        resp = urlopen(url)
+        resp = urlopen(url, context=ctx)
         np_image = np.asarray(bytearray(resp.read()), dtype="uint8")
 
         try:
