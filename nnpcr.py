@@ -277,7 +277,7 @@ class Estimator(object):
         })
 
     def predict(self, x, sess):
-        rslt = sess.run(self.predictions, feed_dict={self.x: x,self.keep_prob: 1.0})
+        rslt = sess.run(self.predictions, feed_dict={self.x: x, self.keep_prob: 1.0})
         return rslt
 
 
@@ -320,7 +320,7 @@ class NNPCR(object):
 
     def predict(self, files):
         features = loadFeatures(files)
-        return self.__est.predict(features)
+        return self.__est.predict(features, self.__sess)
 
     def predictURL(self, files):
         """
@@ -329,7 +329,7 @@ class NNPCR(object):
         :return:
         """
         features = loadFeaturesURL(files)
-        return self.__est.predict(features)
+        return self.__est.predict(features, self.__sess)
 
 
 def printUsage():
