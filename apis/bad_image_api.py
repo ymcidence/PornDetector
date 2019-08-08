@@ -30,4 +30,4 @@ class BadImage(Resource):
 
         result_prediction_list = get_image_prediction(url_list)
         print("\n\n\n", result_prediction_list.shape, "\n\n\n")
-        return jsonify(result_prediction_list.tolist())
+        return jsonify({'predictions': result_prediction_list.tolist()})
