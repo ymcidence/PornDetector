@@ -276,11 +276,9 @@ class Estimator(object):
             self.keep_prob: 1.0,
         })
 
-    def predict(self, x):
-        return self.predictions.eval(feed_dict={
-            self.x: x,
-            self.keep_prob: 1.0,
-        })
+    def predict(self, x, sess):
+        rslt = sess.run(self.predictions, feed_dict={self.x: x,self.keep_prob: 1.0})
+        return rslt
 
 
 class NNPCR(object):
