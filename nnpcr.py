@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import ssl
 try:
     import cPickle as pickle
     from urllib2 import urlopen
@@ -74,6 +74,11 @@ def loadFileLists():
 
 
 def loadFeatures(files):
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+
+
     data = np.ndarray((len(files), IMG_SIZE * IMG_SIZE * 3))
     for n, f in enumerate(files):
         logging.debug('loading file #%d' % n)
