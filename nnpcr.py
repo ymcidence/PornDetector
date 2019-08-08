@@ -79,8 +79,37 @@ def loadFeatures(files):
         logging.debug('loading file #%d' % n)
         img = cv2.imread(f)
         # print(img.shape)
-        #img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        #cv2.imshow("orig", img)
+        # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # cv2.imshow("orig", img)
+        h, w, _ = img.shape
+        if w > h:
+            diff = w - h
+            img = img[:, diff / 2: diff / 2 + h]
+        elif w < h:
+            diff = h - w
+            img = img[diff / 2: diff / 2 + w, :]
+        img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
+        data[n] = img.ravel()
+        # cv2.imshow("res", img)
+        # cv2.waitKey(0)
+    return data
+
+
+def loadFeaturesURL(urls):
+    data = np.ndarray((len(urls), IMG_SIZE * IMG_SIZE * 3))
+    for n, url in enumerate(urls):
+        logging.debug('loading file #%d' % n)
+        resp = urlopen(url)
+        np_image = np.asarray(bytearray(resp.read()), dtype="uint8")
+
+        try:
+            img = cv2.imdecode(np_image, cv2.IMREAD_COLOR)
+        except Exception:
+            img = cv2.imdecode(np_image, cv2.IMREAD_GRAYSCALE)
+
+        # print(img.shape)
+        # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # cv2.imshow("orig", img)
         h, w, _ = img.shape
         if w > h:
             diff = w - h
@@ -167,6 +196,7 @@ def conv2d(x, W):
 def max_pool_2x2(x):
     return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
+
 xavier = tf.contrib.layers.xavier_initializer
 
 
@@ -176,27 +206,27 @@ class Estimator(object):
         x = tf.placeholder(tf.float32, shape=[None, IMG_SIZE * IMG_SIZE * 3])
         y_ = tf.placeholder(tf.float32, shape=[None, 2])
 
-        x_image = tf.reshape(x, [-1, IMG_SIZE, IMG_SIZE, 3])		# 128
+        x_image = tf.reshape(x, [-1, IMG_SIZE, IMG_SIZE, 3])  # 128
 
         W_conv1 = tf.get_variable("W_conv1", shape=[3, 3, 3, 6], initializer=xavier())
         b_conv1 = tf.get_variable('b_conv1', [1, 1, 1, 6])
         h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
-        h_pool1 = max_pool_2x2(h_conv1)								# 64
+        h_pool1 = max_pool_2x2(h_conv1)  # 64
 
         W_conv2 = tf.get_variable("W_conv2", shape=[3, 3, 6, 6], initializer=xavier())
         b_conv2 = tf.get_variable('b_conv2', [1, 1, 1, 6])
         h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
-        h_pool2 = max_pool_2x2(h_conv2)								# 32
+        h_pool2 = max_pool_2x2(h_conv2)  # 32
 
         W_conv3 = tf.get_variable("W_conv3", shape=[3, 3, 6, 12], initializer=xavier())
         b_conv3 = tf.get_variable('b_conv3', [1, 1, 1, 12])
         h_conv3 = tf.nn.relu(conv2d(h_pool2, W_conv3) + b_conv3)
-        h_pool3 = max_pool_2x2(h_conv3)								# 16
+        h_pool3 = max_pool_2x2(h_conv3)  # 16
 
         W_conv4 = tf.get_variable("W_conv4", shape=[3, 3, 12, 24], initializer=xavier())
         b_conv4 = tf.get_variable('b_conv4', [1, 1, 1, 24])
         h_conv4 = tf.nn.relu(conv2d(h_pool3, W_conv4) + b_conv4)
-        h_pool4 = max_pool_2x2(h_conv4)								# 8
+        h_pool4 = max_pool_2x2(h_conv4)  # 8
 
         h_pool4_flat = tf.reshape(h_pool4, [-1, 8 * 8 * 24])
 
@@ -251,9 +281,9 @@ class Estimator(object):
 
 class NNPCR(object):
 
-    def __init__(self):
+    def __init__(self, sess=None):
         tf.set_random_seed(FILE_SEED)
-        self.__sess = tf.InteractiveSession()
+        self.__sess = sess or tf.InteractiveSession()
         self.__est = Estimator()
 
     def train(self, numIterations=1500):
@@ -288,6 +318,15 @@ class NNPCR(object):
 
     def predict(self, files):
         features = loadFeatures(files)
+        return self.__est.predict(features)
+
+    def predictURL(self, files):
+        """
+        you guess
+        :param files: a list of urls
+        :return:
+        """
+        features = loadFeaturesURL(files)
         return self.__est.predict(features)
 
 
