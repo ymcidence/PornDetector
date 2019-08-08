@@ -15,7 +15,7 @@ text_msg_model = api.model("text_msg_model", {
 })
 
 
-@api.route("/bad_image")
+@api.route("/bad_image/")
 class BadImage(Resource):
     """Resource
         The embedding generator
