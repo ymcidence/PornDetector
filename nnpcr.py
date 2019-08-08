@@ -285,9 +285,9 @@ class Estimator(object):
 
 class NNPCR(object):
 
-    def __init__(self, sess=None):
+    def __init__(self, sess_config=None):
         tf.set_random_seed(FILE_SEED)
-        self.__sess = sess or tf.InteractiveSession()
+        self.__sess = tf.InteractiveSession(config=sess_config)
         self.__est = Estimator()
 
     def train(self, numIterations=1500):
