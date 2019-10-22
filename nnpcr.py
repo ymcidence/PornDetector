@@ -96,11 +96,15 @@ def loadFeatures(files):
     return data
 
 
-def loadFeaturesURL(urls):
+def loadFeaturesURL(urls, img_size=IMG_SIZE, vectored=True):
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
-    data = np.ndarray((len(urls), IMG_SIZE * IMG_SIZE * 3))
+    if vectored:
+        data = np.ndarray((len(urls), img_size * img_size * 3))
+    else:
+        data = np.ndarray((len(urls), img_size, img_size, 3))
+
     for n, url in enumerate(urls):
         logging.debug('loading file #%d' % n)
         resp = urlopen(url, context=ctx)
@@ -121,8 +125,8 @@ def loadFeaturesURL(urls):
         elif w < h:
             diff = h - w
             img = img[diff / 2: diff / 2 + w, :]
-        img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
-        data[n] = img.ravel()
+        img = cv2.resize(img, (img_size, img_size))
+        data[n] = img.ravel() if vectored else img
         # cv2.imshow("res", img)
         # cv2.waitKey(0)
     return data
@@ -252,6 +256,7 @@ class Estimator(object):
         train_step = tf.train.AdagradOptimizer(0.01).minimize(cross_entropy)
 
         self.predictions = predictions = tf.argmax(y_conv, 1)
+        self.pp = y_conv
 
         correct_prediction = tf.equal(predictions, tf.argmax(y_, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
@@ -278,6 +283,10 @@ class Estimator(object):
 
     def predict(self, x, sess):
         rslt = sess.run(self.predictions, feed_dict={self.x: x, self.keep_prob: 1.0})
+        return rslt
+
+    def predict2(self, x, sess):
+        rslt = sess.run(self.pp, feed_dict={self.x: x, self.keep_prob: 1.0})
         return rslt
 
 
@@ -322,14 +331,18 @@ class NNPCR(object):
         features = loadFeatures(files)
         return self.__est.predict(features, self.__sess)
 
-    def predictURL(self, files):
+    def predictURL(self, files, out_type=0):
         """
         you guess
+        :param out_type:
         :param files: a list of urls
         :return:
         """
         features = loadFeaturesURL(files)
-        return self.__est.predict(features, self.__sess)
+        if out_type == 0:
+            return self.__est.predict(features, self.__sess)
+        else:
+            return self.__est.predict2(features, self.__sess)
 
 
 def printUsage():

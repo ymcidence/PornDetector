@@ -1,42 +1,19 @@
-# PornDetector
-Two python porn images (nudity) detectors.
+# BadImageFinder
 
-First one (pcr.py) use scikit-learn and opencv. I was able to get ~85% accuracy on markup with 1500 positive and 1500 negative samples. It use two machine-learned classifiers - one of them use HSV colors histogram, and another use SIFT descriptors.
-
-Second one (nnpcr.py) uses tensorflow neural network. I was able to get ~90% accuracy on the same markup. It use 4 convolutional (3x3 filters) combined with max_pool (2x2) layers, one 1024 fully connected layer and a softmax classifier at the end.
-
-### Requirements of opencv & sklearn detector
-- python 2.7
-- scikit-learn 0.15
-- opencv 2.4 (build it from sources, cause it [missing SIFT](http://stackoverflow.com/questions/18561910/opencv-python-cant-use-surf-sift) by default)
-
-### Requirements of tensorlflow detector
+### Requirements 
 - python 2.7
 - opencv 2.4 (you can take binary from repository)
-- latest tensorflow
+- tensorflow >=1.14
+- flask
+- numpy
+- pathlib
 
-This is my configuration, may be it can work with another library versions.
+### Usage
+- Firstly run the api: `python ./manage_worse.py`
+- One is able to send a http request to the api as follows
+```java
+String url = "your server ip:6000/hehe/worse_image";
 
-### Usage of opencv & sklearn detector
-- Url prediction demo: `./pcr.py url http://example.com/img.jpg`
-- Code usage:
-```python
-from pcr import PCR
-model = PCR()
-model.loadModel('model.bin')
-predictions = model.predict(['image1.jpg', 'image2.jpg', 'image3.jpg'])
-print predictions
-```
-
-### Usage of tensorlflow detector
-- Url prediction demo: `./nnpcr.py url http://example.com/img.jpg`
-- Code usage:
-```python
-from nnpcr import NNPCR
-model = NNPCR()
-model.loadModel('nnmodel.bin')
-predictions = model.predict(['image1.jpg', 'image2.jpg', 'image3.jpg'])
-print predictions
 ```
 
 ### Train model

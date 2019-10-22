@@ -20,7 +20,7 @@ model = tf.keras.Sequential([
     global_average_layer,
     prediction_layer
 ])
-base_learning_rate = 1e-3
+base_learning_rate = 1e-4
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=base_learning_rate),
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
@@ -29,6 +29,9 @@ print(model.summary())
 
 dataset = make_data(128)
 
-model.fit(dataset, epochs=1, steps_per_epoch=10000)
+model.fit(dataset, epochs=1, steps_per_epoch=1000)
+for layer in base_model.layers:
+    layer.trainable = True
+model.fit(dataset, epochs=1, steps_per_epoch=3000)
 
 tf.keras.experimental.export_saved_model(model, '../bv_model')

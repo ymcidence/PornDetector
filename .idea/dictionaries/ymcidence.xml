@@ -3,6 +3,7 @@
     <words>
       <w>autotune</w>
       <w>imagenet</w>
+      <w>rslt</w>
     </words>
   </dictionary>
 </component>
