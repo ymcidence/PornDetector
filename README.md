@@ -10,17 +10,37 @@
 
 ### Usage
 - Firstly run the api: `python ./manage_worse.py`
-- One is able to send a http request to the api as follows
+- The api receives a list of image urls splitted by '|', e.g.
+```
+url1|url2|url3
+```
+- It returns a Json with two fields
+```
+predction [N]: 1--bad image; 0--normal image
+preds [N*4]: probability of 0--pron image; 1--bloody image; 2--violent image; 3--normal image 
+```
+- One is able to send a http request to the api in Java as follows
 ```java
-String url = "your server ip:6000/hehe/worse_image";
-
+List<String> imageUrl = ANY URL YOU LIKE;
+HttpClient client = HttpClientBuilder.create().build();
+String url = "your server ip:6000/hehe/worse_image/";
+HttpPost request = new HttpPost(url);
+try
+{
+    StringBuilder mergedUrl = new StringBuilder();
+    for (String i : imageUrl) {
+        mergedUrl.append(i).append("|");
+    }
+    String mergedUrlString = mergedUrl.toString();
+    Map< String, Object > jsonValues = new HashMap< String, Object >();
+    jsonValues.put("urls", mergedUrlString.substring(0, mergedUrlString.length() - 1));
+    StringEntity postingString = new StringEntity(jsonValues.toString(), "UTF8");
+    postingString.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+    request.setEntity(postingString);
+    HttpResponse response = client.execute(request);
+    // DO WHATEVER YOU LIKE HERE TO PROCESS THE RESULTS
+} catch (Exception e){
+    ...
+}
 ```
 
-### Train model
-- create directory 1 (with non-porn images), 2 (with porn images), cache (empty)
-- Run `./pcr.py train` (to train opencv & sklearn) or `./nnpcr.py train` (for tensorflow one).
-
-After train finish you will see accuracy and you will get "model.bin" file with your trained model. Now you can use it to detect porn (see functions predictTest and predictUrl). I added a sample model (model.bin) - you can test it without training your own model, but I recomend you to gather some huge collection of images (eg, 50K) for best results.
-
-### License
-Public domain (but it may use some patented algorithms, eg. SIFT - so you should check license of all used libraries).
