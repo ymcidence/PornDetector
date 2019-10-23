@@ -48,7 +48,7 @@ class WorseImage(Resource):
 
 
 def _test():
-    name = 'file:///home/ymcidence/Workspace/CodeGeass/PornDetector/8.jpg'
+    name = 'file:///home/ymcidence/Workspace/CodeGeass/PornDetector/2.jpg'
     url_list = [name, name]
     rslt1 = get_image_prediction(url_list, 1)
     rslt2 = get_image_prediction2(url_list)

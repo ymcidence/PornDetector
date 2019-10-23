@@ -4,7 +4,7 @@ import tensorflow as tf
 from nnpcr import loadFeaturesURL as load_image
 import numpy as np
 
-model = tf.keras.experimental.load_from_saved_model('../bv_model')
+model = tf.keras.experimental.load_from_saved_model('./bv_model')
 
 
 def get_image_prediction(url_in):
